@@ -1,0 +1,10 @@
+# Backup harian database nuku_redirect.
+# Pasang sebagai /etc/cron.d/nuku-redirect-backup (chmod 644, milik root).
+#
+# Jam 03:00 UTC = 10:00 WIB — di luar jam sibuk kafe/resto klien.
+# File cron.d WAJIB diakhiri baris kosong, kalau tidak cron mengabaikannya.
+
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+0 3 * * * root /usr/local/bin/nuku-backup-db.sh >> /var/log/nuku-backup.log 2>&1

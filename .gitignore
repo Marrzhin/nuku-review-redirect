@@ -1,0 +1,21 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Konfigurasi berisi kredensial. .env.example TETAP ikut ter-commit.
+.env
+
+# Database lokal
+*.db
+*.sqlite3
+
+# Ekspor batch berisi activation_token — ini setara daftar password.
+# Jangan pernah masuk repo, bahkan repo privat.
+batch-*.json
+
+# Hasil unduhan dari panel/API
+qr-*.zip
+qr-*.svg
+*.sql.gz

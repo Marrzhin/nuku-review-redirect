@@ -1,0 +1,30 @@
+# Pasang di VPS sebagai /etc/systemd/system/go-nukustudio.service, lalu:
+#   systemctl daemon-reload && systemctl enable --now go-nukustudio
+# Setelah file ini diubah: systemctl daemon-reload && systemctl restart go-nukustudio
+[Unit]
+Description=Nuku Go - Google Review Redirect Service
+After=network.target mariadb.service
+Requires=mariadb.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/go.nukustudio.id
+Environment="PYTHONUNBUFFERED=1"
+ExecStart=/var/www/go.nukustudio.id/venv/bin/python3 /var/www/go.nukustudio.id/run.py
+Restart=always
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=go-nukustudio
+
+# Pengetatan dasar — opsional, tapi aman untuk aplikasi ini.
+# /var/www tetap bisa ditulis; yang dikunci cuma /usr, /boot, /etc, dan /home.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,17 @@
+fastapi==0.141.1
+uvicorn[standard]==0.52.4
+sqlalchemy[asyncio]==2.0.52
+aiomysql==0.3.2
+cryptography==50.0.1
+alembic==1.19.2
+pydantic==2.13.5
+pydantic-settings==2.15.0
+qrcode==8.2
+
+# Form aktivasi publik: Jinja2 merender template, python-multipart mem-parse
+# body form. Tanpa python-multipart, FastAPI menolak Form() saat startup.
+jinja2==3.1.6
+python-multipart==0.0.32
+
+# Dipakai app/places.py untuk memanggil Google Places API.
+httpx==0.28.1

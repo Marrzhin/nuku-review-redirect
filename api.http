@@ -1,0 +1,118 @@
+### Nuku Review Redirect — koleksi request (VS Code REST Client / JetBrains HTTP Client)
+@host = http://127.0.0.1:8000
+@key = ganti-dengan-key-acak-yang-panjang
+
+# Isi dua variabel ini dari hasil POST /admin/slugs/batch di bawah.
+@slug = ganti-dengan-slug-hasil-batch
+@token = ganti-dengan-activation-token
+
+### Health check
+GET {{host}}/health
+
+
+# =============================================================
+# FASE 1 — PRODUKSI (cetak stok kartu polos, belum ada klien)
+# =============================================================
+
+### 1a. Generate 50 kartu polos. batch_label otomatis dari tanggal (batch-YYYY-MM).
+POST {{host}}/admin/slugs/batch
+X-Admin-Key: {{key}}
+Content-Type: application/json
+
+{
+  "count": 50
+}
+
+### 1b. Kalau mau label sendiri (mis. batch supplier NFC tertentu)
+POST {{host}}/admin/slugs/batch
+X-Admin-Key: {{key}}
+Content-Type: application/json
+
+{
+  "count": 20,
+  "batch_label": "batch-2026-09-nfc-b"
+}
+
+### 1c. Download SEMUA QR satu batch sebagai ZIP -> kirim ke percetakan.
+#    ZIP hanya berisi SVG. Token TIDAK ikut, memang tidak boleh sampai ke percetakan.
+GET {{host}}/admin/qr/export?batch_label=batch-2026-09
+X-Admin-Key: {{key}}
+
+### 1d. Atau ambil semua yang masih jadi stok, lintas batch
+GET {{host}}/admin/qr/export?status=unassigned
+X-Admin-Key: {{key}}
+
+
+# =============================================================
+# FASE 2 — AKTIVASI (saat closing dengan klien)
+# =============================================================
+
+### 2a. Cari Place ID otomatis, tanpa buka Google Maps manual.
+#    Panggilan pertama pakai field mask "places.id" saja -> tier gratis.
+POST {{host}}/admin/lookup-place
+X-Admin-Key: {{key}}
+Content-Type: application/json
+
+{
+  "business_name": "Warkop Sinar",
+  "full_address": "Jl. Merdeka No. 1, Bandung"
+}
+
+### 2b. Ambil detail satu kartu dari stok — di sini ada setup_url yang dikirim ke klien
+GET {{host}}/admin/links/{{slug}}
+X-Admin-Key: {{key}}
+
+### 2c. Buka form aktivasi (ini yang dikirim ke klien lewat WA, BUKAN dicetak di kartu)
+GET {{host}}/setup/{{slug}}?key={{token}}
+
+### 2d. Submit aktivasi. Setelah ini, link di atas otomatis mati.
+POST {{host}}/setup/{{slug}}
+Content-Type: application/x-www-form-urlencoded
+
+key={{token}}&business_name=Warkop Sinar&destination_url=https://g.page/r/PLACE_ID/review
+
+
+# =============================================================
+# OPERASIONAL HARIAN
+# =============================================================
+
+### Lihat stok yang belum terpakai
+GET {{host}}/admin/links?status=unassigned
+X-Admin-Key: {{key}}
+
+### Lihat yang sudah jalan
+GET {{host}}/admin/links?status=active
+X-Admin-Key: {{key}}
+
+### Lihat satu batch produksi
+GET {{host}}/admin/links?batch_label=batch-2026-09
+X-Admin-Key: {{key}}
+
+### Klien pindah lokasi / Place ID berubah — akrilik tidak disentuh
+PATCH {{host}}/admin/links/{{slug}}
+X-Admin-Key: {{key}}
+Content-Type: application/json
+
+{
+  "destination_url": "https://g.page/r/PLACE_ID_BARU/review"
+}
+
+### Klien berhenti langganan
+PATCH {{host}}/admin/links/{{slug}}
+X-Admin-Key: {{key}}
+Content-Type: application/json
+
+{
+  "status": "inactive"
+}
+
+### QR satu kartu (SVG)
+GET {{host}}/admin/links/{{slug}}/qr
+X-Admin-Key: {{key}}
+
+### Statistik hit
+GET {{host}}/admin/links/{{slug}}/stats
+X-Admin-Key: {{key}}
+
+### Redirect publik — ini yang di-scan pelanggan. Tanpa auth, tanpa token.
+GET {{host}}/r/{{slug}}

@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Aktivasi Kartu &middot; Nuku Creative Studio</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: grid; place-items: center;
+    padding: 24px; background: #fafafa; color: #1a1a1a;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .card {
+    width: 100%; max-width: 26rem; background: #fff; border-radius: 16px;
+    padding: 32px 24px; box-shadow: 0 8px 32px rgba(0,0,0,.08);
+  }
+  h1 { font-size: 1.25rem; margin: 0 0 4px; }
+  .sub { margin: 0 0 24px; color: #666; font-size: .875rem; line-height: 1.5; }
+  label { display: block; font-size: .8125rem; font-weight: 600; margin-bottom: 6px; }
+  .hint { font-weight: 400; color: #888; }
+  input[type=text], input[type=url] {
+    width: 100%; padding: 11px 12px; margin-bottom: 18px; font-size: .9375rem;
+    border: 1px solid #d4d4d4; border-radius: 8px; background: #fff; color: inherit;
+  }
+  input:focus { outline: 2px solid #2563eb; outline-offset: -1px; border-color: transparent; }
+  button {
+    width: 100%; padding: 12px; font-size: .9375rem; font-weight: 600;
+    color: #fff; background: #1a1a1a; border: 0; border-radius: 8px; cursor: pointer;
+  }
+  button:hover { background: #333; }
+  .error {
+    padding: 11px 12px; margin-bottom: 18px; border-radius: 8px;
+    background: #fef2f2; color: #991b1b; font-size: .875rem; line-height: 1.5;
+  }
+  .ok { text-align: center; }
+  .ok .mark { font-size: 2.5rem; line-height: 1; margin-bottom: 12px; }
+  .slug {
+    display: inline-block; margin-top: 4px; padding: 2px 8px; border-radius: 6px;
+    background: #f0f0f0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: .8125rem;
+  }
+  .brand {
+    margin-top: 24px; text-align: center; font-size: .75rem; letter-spacing: .08em;
+    text-transform: uppercase; color: #999;
+  }
+  @media (prefers-color-scheme: dark) {
+    body { background: #121212; color: #f0f0f0; }
+    .card { background: #1e1e1e; box-shadow: none; }
+    .sub, .hint { color: #a0a0a0; }
+    input[type=text], input[type=url] { background: #2a2a2a; border-color: #3a3a3a; }
+    button { background: #f0f0f0; color: #121212; }
+    button:hover { background: #d4d4d4; }
+    .error { background: #3b1a1a; color: #fca5a5; }
+    .slug { background: #2a2a2a; }
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+  {% if state == "invalid" %}
+    <h1>Link tidak valid</h1>
+    <p class="sub">
+      Link aktivasi ini tidak valid atau sudah pernah dipakai.
+      Hubungi Nuku Creative Studio untuk mendapatkan link yang baru.
+    </p>
+
+  {% elif state == "success" %}
+    <div class="ok">
+      <div class="mark">&#10003;</div>
+      <h1>Kartu aktif</h1>
+      <p class="sub">
+        Mulai sekarang, setiap kali kartu ini di-scan atau di-tap, pelanggan
+        langsung diarahkan ke halaman ulasan Google
+        <strong>{{ business_name }}</strong>.
+      </p>
+      <p class="sub">
+        Mau mengubah link tujuan nanti? Hubungi Nuku Creative Studio &mdash;
+        halaman ini sudah tidak bisa dipakai lagi.
+      </p>
+      <span class="slug">{{ slug }}</span>
+    </div>
+
+  {% else %}
+    <h1>Aktivasi kartu</h1>
+    <p class="sub">
+      Isi data di bawah untuk menghubungkan kartu <span class="slug">{{ slug }}</span>
+      ke halaman ulasan Google bisnis Anda. Halaman ini hanya bisa dipakai sekali.
+    </p>
+
+    {% if error %}<div class="error">{{ error }}</div>{% endif %}
+
+    <form method="post" action="/setup/{{ slug }}">
+      <input type="hidden" name="key" value="{{ key }}">
+
+      <label for="business_name">Nama bisnis</label>
+      <input type="text" id="business_name" name="business_name" required
+             maxlength="255" placeholder="Warkop Sinar"
+             value="{{ business_name or '' }}">
+
+      <label for="destination_url">
+        Link ulasan Google
+        <span class="hint">&mdash; diawali https://</span>
+      </label>
+      <input type="url" id="destination_url" name="destination_url" required
+             placeholder="https://g.page/r/.../review"
+             value="{{ destination_url or '' }}">
+
+      <button type="submit">Aktifkan kartu</button>
+    </form>
+  {% endif %}
+    <div class="brand">Nuku Creative Studio</div>
+  </div>
+</body>
+</html>

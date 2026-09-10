@@ -1,0 +1,5 @@
+# Dev lokal saja — jangan dipasang di VPS.
+-r requirements.txt
+
+# Supaya bisa jalan tanpa MariaDB (DATABASE_URL=sqlite+aiosqlite:///./dev.db)
+aiosqlite==0.22.1

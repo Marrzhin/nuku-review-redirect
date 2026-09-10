@@ -1,0 +1,723 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Panel Kartu &middot; Nuku Go</title>
+<style>
+:root {
+  --ground: #f6f8f8; --surface: #fff; --sunk: #eceff0;
+  --ink: #14181c; --soft: #4c565c; --faint: #7a868c;
+  --rule: #dbe2e3; --rule-hi: #c3cdcf;
+  --accent: #0f6e70; --accent-soft: #e2f0f0; --accent-ink: #0a5153;
+  --stok: #6b7679; --stok-soft: #eceff0;
+  --aktif: #1f7a3d; --aktif-soft: #e2f1e6;
+  --mati: #9b2f2f; --mati-soft: #f6e5e5;
+  --warn-soft: #fdf3e3; --warn-ink: #855313;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #0f1315; --surface: #171c1f; --sunk: #1e2529;
+    --ink: #e8eeef; --soft: #a7b4b8; --faint: #78868b;
+    --rule: #2a3236; --rule-hi: #3a4449;
+    --accent: #4fbfc1; --accent-soft: #12312f; --accent-ink: #7fd4d5;
+    --stok: #8a9699; --stok-soft: #232a2e;
+    --aktif: #5cc47c; --aktif-soft: #14301d;
+    --mati: #e0797a; --mati-soft: #33191a;
+    --warn-soft: #33260f; --warn-ink: #edbd77;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #0f1315; --surface: #171c1f; --sunk: #1e2529;
+  --ink: #e8eeef; --soft: #a7b4b8; --faint: #78868b;
+  --rule: #2a3236; --rule-hi: #3a4449;
+  --accent: #4fbfc1; --accent-soft: #12312f; --accent-ink: #7fd4d5;
+  --stok: #8a9699; --stok-soft: #232a2e;
+  --aktif: #5cc47c; --aktif-soft: #14301d;
+  --mati: #e0797a; --mati-soft: #33191a;
+  --warn-soft: #33260f; --warn-ink: #edbd77;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--ground); color: var(--ink);
+  font-family: var(--sans); font-size: 15px; line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 60rem; margin: 0 auto; padding: 0 16px 80px; }
+[hidden] { display: none !important; }
+
+/* header */
+header.top {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 18px 0; border-bottom: 1px solid var(--rule); flex-wrap: wrap;
+}
+.brand { display: flex; align-items: baseline; gap: 10px; }
+.brand b { font-size: 1.0625rem; letter-spacing: -.01em; }
+.brand span { font-family: var(--mono); font-size: .75rem; color: var(--faint); }
+
+/* buttons */
+button, .btn {
+  font: inherit; font-size: .875rem; border-radius: 7px; cursor: pointer;
+  border: 1px solid var(--rule-hi); background: var(--surface); color: var(--ink);
+  padding: 7px 13px; display: inline-flex; align-items: center; gap: 6px;
+  text-decoration: none;
+}
+button:hover, .btn:hover { border-color: var(--accent); color: var(--accent); }
+button:focus-visible, .btn:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 1px;
+}
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+button.primary:hover { opacity: .9; color: var(--surface); }
+button.ghost { border-color: transparent; background: transparent; color: var(--soft); padding: 5px 8px; }
+button.ghost:hover { color: var(--accent); }
+button.small { font-size: .8125rem; padding: 5px 10px; }
+button[disabled] { opacity: .5; cursor: not-allowed; }
+
+input, select {
+  font: inherit; font-size: .875rem; padding: 8px 11px; color: var(--ink);
+  background: var(--surface); border: 1px solid var(--rule-hi); border-radius: 7px;
+}
+label.fld { display: flex; flex-direction: column; gap: 5px; font-size: .8125rem; color: var(--soft); }
+
+/* login */
+.login { max-width: 25rem; margin: 12vh auto; text-align: center; }
+.login h1 { font-size: 1.375rem; margin: 0 0 6px; }
+.login p { color: var(--soft); font-size: .9375rem; margin: 0 0 22px; }
+.login form { display: flex; flex-direction: column; gap: 10px; }
+.err { color: var(--mati); font-size: .875rem; min-height: 1.2em; }
+
+/* stats */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 22px 0 18px; }
+.stat {
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 10px;
+  padding: 14px 16px; display: flex; flex-direction: column; gap: 2px;
+}
+.stat b { font-size: 1.75rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stat span { font-family: var(--mono); font-size: .6875rem; letter-spacing: .09em; text-transform: uppercase; color: var(--faint); }
+.stat.s-stok b { color: var(--stok); }
+.stat.s-aktif b { color: var(--aktif); }
+.stat.s-mati b { color: var(--mati); }
+
+/* toolbar */
+.bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; }
+.bar .grow { flex: 1 1 140px; min-width: 130px; }
+.modes { display: inline-flex; border: 1px solid var(--rule-hi); border-radius: 7px; overflow: hidden; }
+.modes button { border: 0; border-radius: 0; background: transparent; }
+.modes button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-ink); }
+
+/* card rows */
+.list { display: flex; flex-direction: column; gap: 8px; }
+.row {
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 10px;
+  overflow: hidden;
+}
+.row-head {
+  display: grid; grid-template-columns: auto auto 1fr auto; gap: 12px;
+  align-items: center; padding: 12px 14px; cursor: pointer;
+}
+.row-head:hover { background: var(--sunk); }
+.slug { font-family: var(--mono); font-size: .9375rem; font-weight: 500; }
+.biz { color: var(--soft); font-size: .875rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.biz em { color: var(--faint); font-style: normal; }
+.chev { color: var(--faint); font-size: .75rem; }
+
+.pill {
+  font-family: var(--mono); font-size: .6875rem; letter-spacing: .04em;
+  padding: 3px 8px; border-radius: 4px; white-space: nowrap;
+}
+.p-unassigned { background: var(--stok-soft); color: var(--stok); }
+.p-active { background: var(--aktif-soft); color: var(--aktif); }
+.p-inactive { background: var(--mati-soft); color: var(--mati); }
+
+.row-body { border-top: 1px solid var(--rule); padding: 14px; display: grid; gap: 14px; }
+.kv { display: grid; gap: 5px; }
+.kv dt { font-family: var(--mono); font-size: .6875rem; letter-spacing: .09em; text-transform: uppercase; color: var(--faint); }
+.kv dd { margin: 0; }
+.urlbox {
+  display: flex; gap: 8px; align-items: center;
+  background: var(--sunk); border-radius: 7px; padding: 8px 10px;
+}
+.urlbox code {
+  font-family: var(--mono); font-size: .78rem; flex: 1;
+  overflow-x: auto; white-space: nowrap; color: var(--ink);
+}
+.acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.qrbox { background: #fff; border-radius: 8px; padding: 10px; width: 168px; }
+.qrbox svg { display: block; width: 100%; height: auto; }
+
+/* nfc mode */
+.nfc-row {
+  display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center;
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 12px 14px;
+}
+.nfc-row.done { opacity: .45; }
+.nfc-row input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--accent); }
+.nfc-slug { font-family: var(--mono); font-size: 1.0625rem; font-weight: 500; }
+.nfc-url { font-family: var(--mono); font-size: .78rem; color: var(--soft); overflow-x: auto; white-space: nowrap; }
+
+/* dialog */
+dialog {
+  border: 1px solid var(--rule); border-radius: 12px; background: var(--surface);
+  color: var(--ink); padding: 0; max-width: 26rem; width: calc(100% - 32px);
+}
+dialog::backdrop { background: rgba(0, 0, 0, .45); }
+.dlg { padding: 20px; display: grid; gap: 14px; }
+.dlg h2 { margin: 0; font-size: 1.0625rem; }
+.dlg p { margin: 0; font-size: .875rem; color: var(--soft); }
+.dlg-acts { display: flex; gap: 8px; justify-content: flex-end; }
+textarea {
+  font: inherit; font-size: .8125rem; font-family: var(--mono); padding: 10px;
+  border: 1px solid var(--rule-hi); border-radius: 7px; background: var(--sunk);
+  color: var(--ink); resize: vertical; min-height: 8rem; width: 100%;
+}
+
+.empty { text-align: center; color: var(--faint); padding: 44px 16px; font-size: .9375rem; }
+.hint { font-size: .8125rem; color: var(--faint); }
+.toast {
+  position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%);
+  background: var(--ink); color: var(--ground); padding: 9px 16px; border-radius: 8px;
+  font-size: .875rem; box-shadow: 0 6px 20px rgba(0, 0, 0, .2); z-index: 50;
+}
+@media (max-width: 560px) {
+  .stats { grid-template-columns: 1fr; }
+  .row-head { grid-template-columns: auto 1fr auto; }
+  .row-head .biz { grid-column: 1 / -1; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div id="login" class="login">
+  <h1>Panel Kartu</h1>
+  <p>Masukkan admin key untuk mulai bekerja.</p>
+  <form id="loginForm">
+    <input type="password" id="keyInput" placeholder="Admin key" autocomplete="off" required>
+    <button class="primary" type="submit">Masuk</button>
+    <div class="err" id="loginErr"></div>
+  </form>
+</div>
+
+<!-- ===== APP ===== -->
+<div id="app" class="wrap" hidden>
+  <header class="top">
+    <div class="brand"><b>Panel Kartu</b><span id="baseUrl">&mdash;</span></div>
+    <div style="display:flex;gap:8px;">
+      <a class="btn" href="/admin/docs" target="_blank" rel="noopener">Swagger</a>
+      <button class="ghost" id="logout" type="button">Keluar</button>
+    </div>
+  </header>
+
+  <div class="stats">
+    <div class="stat s-stok"><b id="cStok">0</b><span>Stok belum terpakai</span></div>
+    <div class="stat s-aktif"><b id="cAktif">0</b><span>Aktif</span></div>
+    <div class="stat s-mati"><b id="cMati">0</b><span>Nonaktif</span></div>
+  </div>
+
+  <div class="bar">
+    <div class="modes">
+      <button type="button" id="mList" aria-pressed="true">Daftar</button>
+      <button type="button" id="mNfc" aria-pressed="false">Tulis NFC</button>
+    </div>
+    <input class="grow" type="search" id="q" placeholder="Cari slug atau nama bisnis">
+    <select id="fStatus">
+      <option value="">Semua status</option>
+      <option value="unassigned">Stok</option>
+      <option value="active">Aktif</option>
+      <option value="inactive">Nonaktif</option>
+    </select>
+    <select id="fBatch"><option value="">Semua batch</option></select>
+    <button type="button" id="btnZip">Unduh ZIP QR</button>
+    <button class="primary" type="button" id="btnBatch">Batch baru</button>
+  </div>
+
+  <div id="nfcHint" class="hint" hidden style="margin-bottom:10px;">
+    Centang tiap kartu setelah tag-nya ditulis. Tanda centang tersimpan di browser ini,
+    jadi aman kalau halaman tertutup di tengah jalan.
+  </div>
+
+  <div id="list" class="list"></div>
+  <div id="empty" class="empty" hidden>Tidak ada kartu yang cocok.</div>
+</div>
+
+<!-- ===== DIALOG: batch baru ===== -->
+<dialog id="dlgBatch">
+  <form method="dialog" class="dlg" id="batchForm">
+    <h2>Buat batch kartu polos</h2>
+    <p>Slug dan token digenerate sekarang. Kartunya belum terhubung ke klien mana pun.</p>
+    <label class="fld">Jumlah kartu
+      <input type="number" id="bCount" min="1" max="500" value="50" required>
+    </label>
+    <label class="fld">Label batch <span class="hint">Kosongkan untuk otomatis dari tanggal</span>
+      <input type="text" id="bLabel" placeholder="batch-2026-09">
+    </label>
+    <div class="err" id="batchErr"></div>
+    <div class="dlg-acts">
+      <button type="button" id="bCancel">Batal</button>
+      <button class="primary" type="button" id="bGo">Buat</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ===== DIALOG: pesan WA ===== -->
+<dialog id="dlgWa">
+  <div class="dlg">
+    <h2>Pesan aktivasi</h2>
+    <p>Ganti nama bisnisnya, lalu salin dan kirim lewat WhatsApp.</p>
+    <label class="fld">Nama bisnis
+      <input type="text" id="waNama" placeholder="Warkop Sinar">
+    </label>
+    <textarea id="waText" readonly></textarea>
+    <div class="dlg-acts">
+      <button type="button" id="waClose">Tutup</button>
+      <button class="primary" type="button" id="waCopy">Salin pesan</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- ===== DIALOG: ubah tujuan ===== -->
+<dialog id="dlgDest">
+  <div class="dlg">
+    <h2>Ubah link tujuan</h2>
+    <p>Kartu fisiknya tidak berubah. Berlaku seketika begitu disimpan.</p>
+    <label class="fld">Link ulasan Google
+      <input type="url" id="destInput" placeholder="https://g.page/r/.../review">
+    </label>
+    <div class="err" id="destErr"></div>
+    <div class="dlg-acts">
+      <button type="button" id="destCancel">Batal</button>
+      <button class="primary" type="button" id="destSave">Simpan</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+"use strict";
+
+var KEY_STORE = "nuku_admin_key";
+var NFC_STORE = "nuku_nfc_done";
+var key = null;
+var base = "";
+var links = [];
+var mode = "list";
+var openSlug = null;
+var destSlug = null;
+
+var $ = function (id) { return document.getElementById(id); };
+
+function toast(msg) {
+  var t = document.createElement("div");
+  t.className = "toast";
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function () { t.remove(); }, 2200);
+}
+
+function copy(text, label) {
+  navigator.clipboard.writeText(text).then(function () {
+    toast((label || "Tersalin") + " ✓");
+  }, function () {
+    toast("Gagal menyalin");
+  });
+}
+
+function api(path, opts) {
+  opts = opts || {};
+  opts.headers = Object.assign({ "X-Admin-Key": key }, opts.headers || {});
+  return fetch(path, opts).then(function (r) {
+    if (r.status === 401) { logout(); throw new Error("Admin key ditolak."); }
+    if (!r.ok) {
+      return r.json().catch(function () { return {}; }).then(function (b) {
+        throw new Error(b.detail || ("Gagal: HTTP " + r.status));
+      });
+    }
+    return r;
+  });
+}
+
+function redirectUrl(slug) { return base + "/r/" + slug; }
+
+/* ---------- nfc checklist ---------- */
+function nfcDone() {
+  try { return JSON.parse(localStorage.getItem(NFC_STORE) || "{}"); }
+  catch (e) { return {}; }
+}
+function nfcToggle(slug, on) {
+  var d = nfcDone();
+  if (on) { d[slug] = 1; } else { delete d[slug]; }
+  try { localStorage.setItem(NFC_STORE, JSON.stringify(d)); } catch (e) { /* mode privat */ }
+}
+
+/* ---------- auth ---------- */
+function logout() {
+  try { localStorage.removeItem(KEY_STORE); } catch (e) { /* abaikan */ }
+  key = null;
+  $("app").hidden = true;
+  $("login").hidden = false;
+  $("keyInput").value = "";
+}
+
+$("loginForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var candidate = $("keyInput").value.trim();
+  if (!candidate) { return; }
+  $("loginErr").textContent = "";
+  key = candidate;
+  api("/admin/links").then(function () {
+    try { localStorage.setItem(KEY_STORE, key); } catch (e) { /* abaikan */ }
+    start();
+  }).catch(function (err) {
+    key = null;
+    $("loginErr").textContent = err.message;
+  });
+});
+
+$("logout").addEventListener("click", logout);
+
+/* ---------- load ---------- */
+function start() {
+  $("login").hidden = true;
+  $("app").hidden = false;
+  fetch("/health").then(function (r) { return r.json(); }).then(function (h) {
+    base = (h.base_url || "").replace(/\/$/, "");
+    $("baseUrl").textContent = base.replace(/^https?:\/\//, "");
+  });
+  refresh();
+}
+
+function refresh() {
+  return api("/admin/links").then(function (r) { return r.json(); }).then(function (data) {
+    links = data;
+    var batches = [];
+    var counts = { unassigned: 0, active: 0, inactive: 0 };
+    data.forEach(function (l) {
+      counts[l.status] = (counts[l.status] || 0) + 1;
+      if (batches.indexOf(l.batch_label) === -1) { batches.push(l.batch_label); }
+    });
+    $("cStok").textContent = counts.unassigned;
+    $("cAktif").textContent = counts.active;
+    $("cMati").textContent = counts.inactive;
+
+    var sel = $("fBatch");
+    var keep = sel.value;
+    sel.innerHTML = '<option value="">Semua batch</option>';
+    batches.sort().forEach(function (b) {
+      var o = document.createElement("option");
+      o.value = b; o.textContent = b;
+      sel.appendChild(o);
+    });
+    sel.value = keep;
+    render();
+  }).catch(function (err) { toast(err.message); });
+}
+
+function visible() {
+  var q = $("q").value.trim().toLowerCase();
+  var st = $("fStatus").value;
+  var bt = $("fBatch").value;
+  return links.filter(function (l) {
+    if (st && l.status !== st) { return false; }
+    if (bt && l.batch_label !== bt) { return false; }
+    if (q) {
+      var hay = (l.slug + " " + (l.business_name || "")).toLowerCase();
+      if (hay.indexOf(q) === -1) { return false; }
+    }
+    if (mode === "nfc" && l.status !== "unassigned") { return false; }
+    return true;
+  });
+}
+
+var LABEL = { unassigned: "stok", active: "aktif", inactive: "nonaktif" };
+
+function render() {
+  var box = $("list");
+  var items = visible();
+  box.innerHTML = "";
+  $("empty").hidden = items.length > 0;
+  $("nfcHint").hidden = mode !== "nfc";
+
+  if (mode === "nfc") {
+    var done = nfcDone();
+    items.forEach(function (l) {
+      var url = redirectUrl(l.slug);
+      var row = document.createElement("div");
+      row.className = "nfc-row" + (done[l.slug] ? " done" : "");
+      var cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = !!done[l.slug];
+      cb.setAttribute("aria-label", "Tandai " + l.slug + " sudah ditulis");
+      cb.addEventListener("change", function () {
+        nfcToggle(l.slug, cb.checked);
+        row.classList.toggle("done", cb.checked);
+      });
+      var mid = document.createElement("div");
+      var s = document.createElement("div");
+      s.className = "nfc-slug"; s.textContent = l.slug;
+      var u = document.createElement("div");
+      u.className = "nfc-url"; u.textContent = url;
+      mid.appendChild(s); mid.appendChild(u);
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "small"; b.textContent = "Salin URL";
+      b.addEventListener("click", function () { copy(url, "URL disalin"); });
+      row.appendChild(cb); row.appendChild(mid); row.appendChild(b);
+      box.appendChild(row);
+    });
+    return;
+  }
+
+  items.forEach(function (l) {
+    var row = document.createElement("div");
+    row.className = "row";
+
+    var head = document.createElement("div");
+    head.className = "row-head";
+    head.setAttribute("role", "button");
+    head.setAttribute("tabindex", "0");
+
+    var slug = document.createElement("div");
+    slug.className = "slug"; slug.textContent = l.slug;
+
+    var pill = document.createElement("span");
+    pill.className = "pill p-" + l.status;
+    pill.textContent = LABEL[l.status] || l.status;
+
+    var biz = document.createElement("div");
+    biz.className = "biz";
+    if (l.business_name) { biz.textContent = l.business_name; }
+    else { biz.innerHTML = "<em>belum ada klien &middot; " + l.batch_label + "</em>"; }
+
+    var chev = document.createElement("span");
+    chev.className = "chev";
+    chev.textContent = openSlug === l.slug ? "▲" : "▼";
+
+    head.appendChild(slug); head.appendChild(pill); head.appendChild(biz); head.appendChild(chev);
+
+    function toggle() {
+      openSlug = openSlug === l.slug ? null : l.slug;
+      render();
+    }
+    head.addEventListener("click", toggle);
+    head.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); }
+    });
+    row.appendChild(head);
+
+    if (openSlug === l.slug) {
+      var body = document.createElement("div");
+      body.className = "row-body";
+      body.appendChild(urlField("URL di kartu (QR & NFC)", redirectUrl(l.slug)));
+
+      var acts = document.createElement("div");
+      acts.className = "acts";
+      acts.appendChild(mkBtn("Lihat QR", function () { showQr(l.slug, body); }));
+      acts.appendChild(mkBtn("Unduh QR", function () { dlQr(l.slug); }));
+
+      if (l.status === "unassigned") {
+        acts.appendChild(mkBtn("Pesan aktivasi", function () { waFor(l); }, true));
+      } else {
+        acts.appendChild(mkBtn("Ubah tujuan", function () { openDest(l); }));
+        acts.appendChild(mkBtn("Statistik", function () { showStats(l.slug); }));
+      }
+      if (l.status === "active") {
+        acts.appendChild(mkBtn("Nonaktifkan", function () { setStatus(l.slug, "inactive"); }));
+      } else if (l.status === "inactive") {
+        acts.appendChild(mkBtn("Aktifkan lagi", function () { setStatus(l.slug, "active"); }));
+      }
+      body.appendChild(acts);
+
+      if (l.destination_url) {
+        body.appendChild(urlField("Tujuan sekarang", l.destination_url));
+      }
+      row.appendChild(body);
+    }
+    box.appendChild(row);
+  });
+}
+
+function mkBtn(text, fn, primary) {
+  var b = document.createElement("button");
+  b.type = "button";
+  b.className = "small" + (primary ? " primary" : "");
+  b.textContent = text;
+  b.addEventListener("click", fn);
+  return b;
+}
+
+function urlField(label, value) {
+  var d = document.createElement("dl");
+  d.className = "kv";
+  var dt = document.createElement("dt"); dt.textContent = label;
+  var dd = document.createElement("dd");
+  var box = document.createElement("div"); box.className = "urlbox";
+  var c = document.createElement("code"); c.textContent = value;
+  var b = document.createElement("button");
+  b.type = "button"; b.className = "small"; b.textContent = "Salin";
+  b.addEventListener("click", function () { copy(value, "Disalin"); });
+  box.appendChild(c); box.appendChild(b);
+  dd.appendChild(box); d.appendChild(dt); d.appendChild(dd);
+  return d;
+}
+
+/* ---------- actions ---------- */
+function showQr(slug, body) {
+  if (body.querySelector(".qrbox")) { return; }
+  api("/admin/links/" + slug + "/qr?download=false")
+    .then(function (r) { return r.text(); })
+    .then(function (svg) {
+      var box = document.createElement("div");
+      box.className = "qrbox";
+      box.innerHTML = svg;
+      body.appendChild(box);
+    }).catch(function (e) { toast(e.message); });
+}
+
+function dlQr(slug) {
+  api("/admin/links/" + slug + "/qr")
+    .then(function (r) { return r.blob(); })
+    .then(function (b) { saveBlob(b, "qr-" + slug + ".svg"); })
+    .catch(function (e) { toast(e.message); });
+}
+
+function saveBlob(blob, name) {
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+}
+
+function showStats(slug) {
+  api("/admin/links/" + slug + "/stats")
+    .then(function (r) { return r.json(); })
+    .then(function (s) {
+      toast("Total " + s.total_hits + " scan · 7 hari terakhir " + s.hits_last_7_days);
+    }).catch(function (e) { toast(e.message); });
+}
+
+function setStatus(slug, status) {
+  api("/admin/links/" + slug, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status: status })
+  }).then(function () {
+    toast(status === "active" ? "Kartu diaktifkan" : "Kartu dinonaktifkan");
+    refresh();
+  }).catch(function (e) { toast(e.message); });
+}
+
+/* ---------- pesan WA ---------- */
+var waLink = "";
+function waFor(l) {
+  api("/admin/links/" + l.slug).then(function (r) { return r.json(); }).then(function (d) {
+    if (!d.setup_url) { toast("Kartu ini sudah tidak bisa diaktivasi."); return; }
+    waLink = d.setup_url;
+    $("waNama").value = l.business_name || "";
+    waRender();
+    $("dlgWa").showModal();
+  }).catch(function (e) { toast(e.message); });
+}
+function waRender() {
+  var nama = $("waNama").value.trim() || "[NAMA BISNIS]";
+  $("waText").value =
+    "Halo Pak/Bu, kartu ulasan Google untuk " + nama + " sudah siap.\n\n" +
+    "Tinggal satu langkah terakhir dari Bapak/Ibu: buka link di bawah lewat HP, " +
+    "isi nama bisnis dan link ulasan Google-nya, lalu tekan Aktifkan.\n\n" +
+    waLink + "\n\n" +
+    "Link ini hanya bisa dipakai sekali, jadi mohon jangan diteruskan ke siapa pun. " +
+    "Setelah aktif, tiap pelanggan yang scan atau tap kartunya langsung diarahkan ke " +
+    "halaman ulasan Google Bapak/Ibu.\n\n" +
+    "Kalau ada kendala, balas pesan ini saja.";
+}
+$("waNama").addEventListener("input", waRender);
+$("waCopy").addEventListener("click", function () { copy($("waText").value, "Pesan disalin"); });
+$("waClose").addEventListener("click", function () { $("dlgWa").close(); });
+
+/* ---------- ubah tujuan ---------- */
+function openDest(l) {
+  destSlug = l.slug;
+  $("destInput").value = l.destination_url || "";
+  $("destErr").textContent = "";
+  $("dlgDest").showModal();
+}
+$("destCancel").addEventListener("click", function () { $("dlgDest").close(); });
+$("destSave").addEventListener("click", function () {
+  var v = $("destInput").value.trim();
+  if (!v) { $("destErr").textContent = "Link tidak boleh kosong."; return; }
+  api("/admin/links/" + destSlug, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ destination_url: v })
+  }).then(function () {
+    $("dlgDest").close();
+    toast("Tujuan diperbarui");
+    refresh();
+  }).catch(function (e) { $("destErr").textContent = e.message; });
+});
+
+/* ---------- batch baru ---------- */
+$("btnBatch").addEventListener("click", function () {
+  $("batchErr").textContent = "";
+  $("dlgBatch").showModal();
+});
+$("bCancel").addEventListener("click", function () { $("dlgBatch").close(); });
+$("bGo").addEventListener("click", function () {
+  var payload = { count: parseInt($("bCount").value, 10) };
+  var label = $("bLabel").value.trim();
+  if (label) { payload.batch_label = label; }
+  $("bGo").disabled = true;
+  api("/admin/slugs/batch", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  }).then(function (r) { return r.json(); }).then(function (d) {
+    saveBlob(
+      new Blob([JSON.stringify(d, null, 2)], { type: "application/json" }),
+      d.batch_label + ".json"
+    );
+    $("dlgBatch").close();
+    toast(d.count + " kartu dibuat · token terunduh");
+    refresh();
+  }).catch(function (e) {
+    $("batchErr").textContent = e.message;
+  }).then(function () { $("bGo").disabled = false; });
+});
+
+/* ---------- zip ---------- */
+$("btnZip").addEventListener("click", function () {
+  var qs = [];
+  if ($("fBatch").value) { qs.push("batch_label=" + encodeURIComponent($("fBatch").value)); }
+  if ($("fStatus").value) { qs.push("status=" + encodeURIComponent($("fStatus").value)); }
+  var nama = $("fBatch").value || $("fStatus").value || "semua";
+  api("/admin/qr/export" + (qs.length ? "?" + qs.join("&") : ""))
+    .then(function (r) { return r.blob(); })
+    .then(function (b) { saveBlob(b, "qr-" + nama + ".zip"); })
+    .catch(function (e) { toast(e.message); });
+});
+
+/* ---------- filter & mode ---------- */
+["q", "fStatus", "fBatch"].forEach(function (id) {
+  $(id).addEventListener("input", function () { openSlug = null; render(); });
+});
+$("mList").addEventListener("click", function () { setMode("list"); });
+$("mNfc").addEventListener("click", function () { setMode("nfc"); });
+function setMode(m) {
+  mode = m;
+  openSlug = null;
+  $("mList").setAttribute("aria-pressed", String(m === "list"));
+  $("mNfc").setAttribute("aria-pressed", String(m === "nfc"));
+  render();
+}
+
+/* ---------- boot ---------- */
+try {
+  var saved = localStorage.getItem(KEY_STORE);
+  if (saved) { key = saved; start(); }
+} catch (e) { /* penyimpanan diblokir, tampilkan login */ }
+</script>
+</body>
+</html>

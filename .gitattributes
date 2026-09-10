@@ -1,0 +1,11 @@
+# Project ini dikembangkan di Windows tapi dijalankan di Linux (VPS).
+# Paksa LF untuk semua file teks: kalau backup-db.sh atau unit systemd
+# ter-checkout dengan CRLF, Linux membalas "bad interpreter" / unit gagal
+# di-parse — error yang penyebabnya sangat sulit ditebak.
+* text=auto eol=lf
+
+# Biner, jangan disentuh sama sekali.
+*.png binary
+*.jpg binary
+*.zip binary
+*.gz binary
