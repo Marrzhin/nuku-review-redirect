@@ -155,7 +155,7 @@ parser URL salah membaca batas antara password dan hostname.
 | `GET /admin/links` | List semua kartu (filter `?status=` dan/atau `?batch_label=`) | `X-Admin-Key` |
 | `GET /admin/links/{slug}` | Detail satu kartu, termasuk `setup_url` selama masih `unassigned` | `X-Admin-Key` |
 | `PATCH /admin/links/{slug}` | Update `business_name`, `destination_url`, dan/atau `status` | `X-Admin-Key` |
-| `GET /admin/links/{slug}/qr` | QR SVG satu kartu. Opsi `?upper=false` dan `?download=false` | `X-Admin-Key` |
+| `GET /admin/links/{slug}/qr` | QR SVG satu kartu. Opsi `?compact=true` (29x29) dan `?download=false` | `X-Admin-Key` |
 | `GET /admin/links/{slug}/stats` | Total hit + 7 hari terakhir + hit terakhir kapan | `X-Admin-Key` |
 | `POST /admin/lookup-place` | Cari Place ID dari `business_name` + `full_address` lewat Places API | `X-Admin-Key` |
 
@@ -207,14 +207,15 @@ curl -H "X-Admin-Key: $ADMIN_API_KEY" \
   untuk membedakan Android vs iPhone secara kasar.
 - **QR pakai error correction level Q** supaya masih terbaca walau akrilik tergores
   atau sebagian tertutup.
-- **URL di dalam QR di-encode huruf kapital.** Mode alfanumerik QR hanya mendukung
-  huruf besar, dan mode itu jauh lebih padat daripada mode byte:
-  `HTTPS://GO.NUKUSTUDIO.ID/R/WARKOP-SINAR` cukup 29x29 modul, versus 33x33 kalau
-  huruf kecil. Di ukuran akrilik yang sama, tiap modul jadi ~12% lebih besar —
-  lebih tahan gores dan pantulan cahaya. Aman karena scheme dan domain memang
-  case-insensitive, dan slug di-lowercase saat lookup. Teks URL yang tercetak di
-  akrilik tetap boleh huruf kecil; yang kapital hanya isi QR-nya.
-  Pakai `?upper=false` kalau sewaktu-waktu butuh versi huruf kecil.
+- **Isi QR sama persis dengan URL yang ditulis di NFC tag.** Default-nya huruf
+  kecil apa adanya, 33x33 modul. Ini penting saat menelusuri masalah: satu kartu
+  punya satu string, bukan dua versi yang berbeda huruf besar-kecilnya.
+- **Mode padat tersedia, tapi bukan default.** `?compact=true` mengapitalkan
+  scheme + domain saja sehingga QR turun ke 29x29 modul, dan **slug tetap utuh**
+  karena hanya bagian yang case-insensitive menurut spesifikasi URL yang diubah.
+  Pada cetakan 30 mm, 33x33 menghasilkan 0,73 mm per modul sementara 29x29
+  memberi 0,81 mm — keduanya jauh di atas ambang aman kamera HP (~0,4 mm), jadi
+  mode padat baru relevan kalau QR harus dicetak sangat kecil.
 
 ## Deployment
 

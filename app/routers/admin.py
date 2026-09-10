@@ -106,7 +106,12 @@ async def export_qr(
     link_status: LinkStatus | None = Query(
         default=None, alias="status", description="Filter status kartu"
     ),
-    upper: bool = Query(default=True, description="Encode URL kapital"),
+    compact: bool = Query(
+        default=False,
+        description="Padatkan QR ke 29x29 dengan mengapitalkan domain "
+        "(slug tetap utuh). Default 33x33, isi QR sama persis dengan URL "
+        "yang ditulis di NFC tag.",
+    ),
     session: AsyncSession = Depends(get_session),
 ):
     links = await crud.list_links(session, status=link_status, batch_label=batch_label)
@@ -116,7 +121,8 @@ async def export_qr(
             detail="Tidak ada kartu yang cocok dengan filter itu.",
         )
     blob = make_qr_zip(
-        ((link.slug, settings.redirect_url(link.slug)) for link in links), upper=upper
+        ((link.slug, settings.redirect_url(link.slug)) for link in links),
+        compact=compact,
     )
     nama = (batch_label.strip().lower() if batch_label else None) or (
         link_status.value if link_status else "semua"
@@ -173,14 +179,16 @@ async def update_link(
 async def get_qr(
     slug: str,
     download: bool = Query(default=True, description="Kirim sebagai file download"),
-    upper: bool = Query(
-        default=True,
-        description="Encode URL kapital (mode alfanumerik) - QR lebih renggang.",
+    compact: bool = Query(
+        default=False,
+        description="Padatkan QR ke 29x29 dengan mengapitalkan domain "
+        "(slug tetap utuh). Default 33x33, isi QR sama persis dengan URL "
+        "yang ditulis di NFC tag.",
     ),
     session: AsyncSession = Depends(get_session),
 ):
     link = await _get_or_404(session, slug)
-    svg = make_qr_svg(settings.redirect_url(link.slug), upper=upper)
+    svg = make_qr_svg(settings.redirect_url(link.slug), compact=compact)
     disposition = "attachment" if download else "inline"
     return Response(
         content=svg,
