@@ -25,6 +25,10 @@ venv/bin/alembic upgrade head
 echo "== izin berkas =="
 # Service jalan sebagai www-data, jadi user itu harus bisa membaca semuanya.
 chown -R www-data:www-data "$APP"
+# Tapi .git dikembalikan ke root: aplikasi tidak perlu menyentuh riwayat repo,
+# dan kalau suatu saat proses www-data disalahgunakan, ia tidak bisa menulis
+# ulang isi repo lalu ikut terbawa di deploy berikutnya.
+chown -R root:root "$APP/.git"
 # .env memuat admin key dan password database.
 chmod 600 "$APP/.env"
 
