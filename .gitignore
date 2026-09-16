@@ -22,3 +22,13 @@ qr-*.svg
 
 # File kunci sementara Affinity Designer
 *~lock~
+
+# Aset desain. Sengaja di luar repo: ukurannya ratusan MB, server tidak
+# memakainya sama sekali, dan setiap ./deploy/update.sh menarik isi repo ke
+# VPS. Git juga menyimpan riwayat, jadi file besar tidak benar-benar hilang
+# meski nanti dihapus. Simpan di Drive atau folder desain terpisah.
+*.af
+*.afdesign
+*.afphoto
+*.afpub
+QR- Batch*/
