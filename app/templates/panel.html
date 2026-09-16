@@ -280,6 +280,33 @@ textarea {
   </div>
 </dialog>
 
+<!-- ===== DIALOG: aktifkan sendiri ===== -->
+<dialog id="dlgAktif">
+  <div class="dlg">
+    <h2>Aktifkan kartu</h2>
+    <p>
+      Pakai ini kalau Anda yang mengisikan data klien. Setelah tersimpan, link
+      aktivasi kartu ini otomatis mati &mdash; klien tidak bisa memakainya lagi.
+    </p>
+    <label class="fld">Nama bisnis
+      <input type="text" id="aktifNama" placeholder="Warkop Sinar" maxlength="255">
+    </label>
+    <label class="fld">Link ulasan Google
+      <input type="text" id="aktifDest" placeholder="g.page/r/.../review">
+    </label>
+    <p class="hint">
+      Boleh ditempel tanpa <code>https://</code>. Kalau klien tidak punya link
+      <code>g.page</code>, pakai format Maps:
+      <code>google.com/maps/search/?api=1&amp;query=NAMA&amp;query_place_id=PLACE_ID</code>
+    </p>
+    <div class="err" id="aktifErr"></div>
+    <div class="dlg-acts">
+      <button type="button" id="aktifCancel">Batal</button>
+      <button class="primary" type="button" id="aktifSave">Aktifkan</button>
+    </div>
+  </div>
+</dialog>
+
 <!-- ===== DIALOG: ubah tujuan ===== -->
 <dialog id="dlgDest">
   <div class="dlg">
@@ -538,6 +565,7 @@ function render() {
 
       if (l.status === "unassigned") {
         acts.appendChild(mkBtn("Pesan aktivasi", function () { waFor(l); }, true));
+        acts.appendChild(mkBtn("Aktifkan sendiri", function () { openAktif(l); }));
       } else {
         acts.appendChild(mkBtn("Ubah tujuan", function () { openDest(l); }));
         acts.appendChild(mkBtn("Statistik", function () { showStats(l.slug); }));
@@ -655,6 +683,42 @@ function waRender() {
 $("waNama").addEventListener("input", waRender);
 $("waCopy").addEventListener("click", function () { copy($("waText").value, "Pesan disalin"); });
 $("waClose").addEventListener("click", function () { $("dlgWa").close(); });
+
+/* ---------- aktifkan sendiri ---------- */
+var aktifSlug = null;
+function openAktif(l) {
+  aktifSlug = l.slug;
+  $("aktifNama").value = "";
+  $("aktifDest").value = "";
+  $("aktifErr").textContent = "";
+  $("dlgAktif").showModal();
+  $("aktifNama").focus();
+}
+$("aktifCancel").addEventListener("click", function () { $("dlgAktif").close(); });
+$("aktifSave").addEventListener("click", function () {
+  var nama = $("aktifNama").value.trim();
+  var dest = $("aktifDest").value.trim();
+  if (!nama) { $("aktifErr").textContent = "Nama bisnis belum diisi."; return; }
+  if (!dest) { $("aktifErr").textContent = "Link ulasan belum diisi."; return; }
+  $("aktifSave").disabled = true;
+  // Satu PATCH: nama, tujuan, dan status sekaligus. Server menolak kalau
+  // status active dikirim tanpa tujuan, jadi ketiganya memang harus menyatu.
+  api("/admin/links/" + aktifSlug, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      business_name: nama,
+      destination_url: dest,
+      status: "active"
+    })
+  }).then(function () {
+    $("dlgAktif").close();
+    toast("Kartu " + aktifSlug + " aktif");
+    refresh();
+  }).catch(function (e) {
+    $("aktifErr").textContent = e.message;
+  }).then(function () { $("aktifSave").disabled = false; });
+});
 
 /* ---------- ubah tujuan ---------- */
 function openDest(l) {

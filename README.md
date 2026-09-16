@@ -429,6 +429,7 @@ kartu.
 | Cari kartu | Kotak cari (slug atau nama bisnis) + filter status & batch |
 | Tulis NFC tag | Mode **Tulis NFC** — slug besar, URL siap salin, centang per kartu |
 | Kirim link aktivasi | Tombol **Pesan aktivasi** — pesan WhatsApp lengkap, tinggal salin |
+| Aktivasi oleh admin | Tombol **Aktifkan sendiri** — isi nama bisnis + link, kartu langsung hidup |
 | Buat batch | Tombol **Batch baru** — token otomatis terunduh sebagai JSON |
 | Ubah tujuan / nonaktifkan | Tombol di baris kartu yang sudah aktif |
 | Unduh QR | Per kartu, atau satu ZIP mengikuti filter yang sedang aktif |

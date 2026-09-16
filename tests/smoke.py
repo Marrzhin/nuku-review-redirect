@@ -233,6 +233,30 @@ async def jalan():
         check("filter kosong -> 404",
               (await c.get("/admin/qr/export?batch_label=tidak-ada", headers=H)).status_code == 404)
 
+        bagian("Admin aktifkan sendiri (tombol di panel)")
+        # Blueprint mengizinkan admin mengisikan data klien sendiri. Panel
+        # mengirim nama, tujuan, dan status dalam SATU patch — harus menyatu,
+        # karena server menolak status=active tanpa destination_url.
+        s2, t2 = slugs[2], toks[2]
+        check("link setup s2 masih hidup sebelum diaktifkan",
+              (await c.get(f"/setup/{s2}?key={t2}")).status_code == 200)
+        r = await c.patch("/admin/links/" + s2, json={
+            "business_name": "Kopi Pagi",
+            "destination_url": "g.page/r/XYZ/review",
+            "status": "active",
+        }, headers=H)
+        check("aktivasi oleh admin dalam satu PATCH", r.status_code == 200, r.text)
+        d2 = r.json()
+        check("nama, tujuan, dan status tersimpan",
+              d2["business_name"] == "Kopi Pagi"
+              and d2["destination_url"] == "https://g.page/r/XYZ/review"
+              and d2["status"] == "active", d2)
+        check("activated_at ikut terisi", d2["activated_at"] is not None)
+        check("kartu langsung meredirect",
+              (await c.get("/r/" + s2)).headers.get("location") == "https://g.page/r/XYZ/review")
+        check("link setup mati setelah diaktifkan admin",
+              (await c.get(f"/setup/{s2}?key={t2}")).status_code == 404)
+
         bagian("Statistik dan Places")
         await asyncio.sleep(0.3)
         st = (await c.get("/admin/links/" + s0 + "/stats", headers=H)).json()
