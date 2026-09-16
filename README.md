@@ -86,6 +86,17 @@ Dokumentasi interaktif: <http://127.0.0.1:8000/admin/docs>
 > langsung bisa dipakai tanpa menyalakan database apa pun. Semua endpoint jalan sama
 > persis seperti di MariaDB. Yang perlu diganti hanya `ADMIN_API_KEY`.
 
+## Menjalankan tes
+
+
+
+Menguji alur ujung-ke-ujung memakai SQLite sementara dan memanggil aplikasi
+langsung lewat ASGI — tidak butuh MariaDB maupun server yang sedang berjalan,
+jadi aman dijalankan kapan saja. Butuh `requirements-dev.txt`.
+
+Jalankan ini sebelum `git push`, karena deploy di VPS menarik langsung dari
+branch `main`.
+
 ## Setup database produksi
 
 Di VPS sudah tersedia MariaDB 10.11 dengan database `nuku_redirect` dan user

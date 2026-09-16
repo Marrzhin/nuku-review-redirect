@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app import crud
 from app.database import get_session
 from app.models import LinkStatus, ReviewLink
+from app.schemas import normalize_url
 
 router = APIRouter(prefix="/setup", tags=["setup"])
 
@@ -66,7 +67,8 @@ async def submit_form(
         return _halaman_invalid(request)
 
     nama = business_name.strip()
-    tujuan = destination_url.strip()
+    # Klien sering menempel link tanpa "https://" — lengkapi, jangan tolak.
+    tujuan = normalize_url(destination_url)
     galat = None
     if not nama:
         galat = "Nama bisnis tidak boleh kosong."
@@ -74,7 +76,10 @@ async def submit_form(
         try:
             url_adapter.validate_python(tujuan)
         except ValidationError:
-            galat = "Link ulasan tidak valid. Pastikan diawali https:// dan lengkap."
+            galat = (
+                "Link ulasan Google tidak dikenali. Salin ulang langsung dari "
+                "Google, contohnya g.page/r/.../review"
+            )
 
     if galat:
         return templates.TemplateResponse(

@@ -6,7 +6,22 @@ from pydantic import AnyHttpUrl, BaseModel, ConfigDict, Field, field_validator
 from app.models import LinkStatus
 
 SLUG_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+SCHEME_PATTERN = re.compile(r"^[a-zA-Z][a-zA-Z0-9+.\-]*://")
 BATCH_LABEL_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+
+
+def normalize_url(value: str) -> str:
+    """Lengkapi URL yang ditempel tanpa skema.
+
+    Orang menyalin link ulasan dari Google sering mendapat bentuk tanpa
+    `https://` (mis. langsung `g.page/r/.../review`). Menolaknya sebagai
+    "tidak valid" hanya membingungkan — apalagi di form aktivasi yang diisi
+    klien, bukan admin. Jadi skema-nya dilengkapi, bukan ditolak.
+    """
+    v = value.strip()
+    if v and not SCHEME_PATTERN.match(v):
+        return "https://" + v
+    return v
 
 
 def normalize_slug(value: str) -> str:
@@ -89,6 +104,11 @@ class LinkUpdate(BaseModel):
     business_name: str | None = Field(default=None, min_length=1, max_length=255)
     destination_url: AnyHttpUrl | None = None
     status: LinkStatus | None = None
+
+    @field_validator("destination_url", mode="before")
+    @classmethod
+    def _lengkapi_skema(cls, v):
+        return normalize_url(v) if isinstance(v, str) else v
 
 
 class LinkStats(BaseModel):

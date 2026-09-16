@@ -19,3 +19,6 @@ batch-*.json
 qr-*.zip
 qr-*.svg
 *.sql.gz
+
+# File kunci sementara Affinity Designer
+*~lock~

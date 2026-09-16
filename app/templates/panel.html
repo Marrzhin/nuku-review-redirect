@@ -326,6 +326,25 @@ function copy(text, label) {
   });
 }
 
+/* FastAPI mengirim `detail` sebagai string untuk HTTPException biasa, tapi
+   sebagai ARRAY objek untuk galat validasi (422). Menyambungkannya langsung ke
+   pesan menghasilkan "[object Object]" — tidak memberi tahu apa pun. */
+function bacaDetail(body, status) {
+  var d = body && body.detail;
+  if (typeof d === "string" && d) { return d; }
+  if (Array.isArray(d) && d.length) {
+    return d.map(function (e) {
+      var loc = Array.isArray(e.loc) ? e.loc[e.loc.length - 1] : null;
+      var msg = e.msg || "nilai tidak valid";
+      return loc && loc !== "body" ? loc + ": " + msg : msg;
+    }).join(" · ");
+  }
+  if (d && typeof d === "object") {
+    try { return JSON.stringify(d); } catch (e) { /* lanjut ke pesan umum */ }
+  }
+  return "Gagal: HTTP " + status;
+}
+
 function api(path, opts) {
   opts = opts || {};
   opts.headers = Object.assign({ "X-Admin-Key": key }, opts.headers || {});
@@ -333,7 +352,7 @@ function api(path, opts) {
     if (r.status === 401) { logout(); throw new Error("Admin key ditolak."); }
     if (!r.ok) {
       return r.json().catch(function () { return {}; }).then(function (b) {
-        throw new Error(b.detail || ("Gagal: HTTP " + r.status));
+        throw new Error(bacaDetail(b, r.status));
       });
     }
     return r;
